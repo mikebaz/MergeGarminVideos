@@ -11,17 +11,22 @@ function New-MergedVideo($currentList, $firstDate) {
             $uniqueSuffix = $uniqueSuffix + 1
         }
     }
-    Write-Output "$($currentList.Count) files getting combined into $destinationFilename"
-    Write-Output "... $($currentList[0]) through $($currentList[$currentList.Count-1])"
-    # https://gpac.wp.imt.fr/mp4box/mp4box-documentation/
-    [string[]] $argList = "-force-cat"
-    foreach ($fileName in $currentList) {
-        $argList += "-cat"
-        $argList += $fileName
+    if ($currentList.Count -eq 1) {
+        Write-Output "1 file getting copied into $destinationFilename"
+        Copy-Item $currentList[0] -Destination $destinationFilename
+    } else {
+        Write-Output "$($currentList.Count) files getting combined into $destinationFilename"
+        Write-Output "... $($currentList[0]) through $($currentList[$currentList.Count-1])"
+        # https://gpac.wp.imt.fr/mp4box/mp4box-documentation/
+        [string[]] $argList = "-force-cat"
+        foreach ($fileName in $currentList) {
+            $argList += "-cat"
+            $argList += $fileName
+        }
+        $argList += "-new", $destinationFilename
+        $argList += "-tmp", $destinationFolder
+        Start-Process 'C:\Program Files\GPAC\mp4box.exe' -ArgumentList $argList -Wait -NoNewWindow
     }
-    $argList += "-new", $destinationFilename
-    $argList += "-tmp", $destinationFolder
-    Start-Process 'C:\Program Files\GPAC\mp4box.exe' -ArgumentList $argList -Wait -NoNewWindow
 }
 
 Set-Location $sourceFolder
